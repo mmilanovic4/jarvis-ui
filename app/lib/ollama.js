@@ -5,7 +5,6 @@ const OLLAMA_URL = "http://localhost:11434";
 const ollama = new Ollama({ host: OLLAMA_URL });
 
 export async function checkStatus() {
-  console.log("Checking Ollama status...");
   try {
     await fetch(OLLAMA_URL);
     return true;
