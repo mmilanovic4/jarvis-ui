@@ -1,6 +1,7 @@
 "use client";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -18,8 +19,10 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [listening, setListening] = useState(false);
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     async function loadMessages() {
@@ -77,6 +80,41 @@ export default function Home() {
       e.preventDefault();
       sendMessage();
     }
+  }
+
+  function toggleVoice() {
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error("Your browser doesn't support voice input.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      recognition.stop();
+      setListening(false);
+    };
+
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
   }
 
   if (error) {
@@ -181,6 +219,27 @@ export default function Home() {
         </div>
       </div>
 
+      {listening && (
+        <div className="bg-background/80 absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
+          <div className="relative flex items-center justify-center">
+            <span className="bg-destructive/20 absolute h-16 w-16 animate-ping rounded-full" />
+            <span className="bg-destructive/40 absolute h-12 w-12 animate-ping rounded-full [animation-delay:0.2s]" />
+            <Button
+              size="icon"
+              variant="destructive"
+              onClick={toggleVoice}
+              className="relative h-14 w-14 rounded-full"
+            >
+              <Mic className="h-6 w-6" />
+            </Button>
+          </div>
+          <p className="text-muted-foreground animate-pulse text-sm tracking-widest uppercase">
+            Listening...
+          </p>
+          <p className="text-muted-foreground text-xs">Click to stop</p>
+        </div>
+      )}
+
       {/* Input — shrink-0 da ne raste i ne pomera messages */}
       <div className="bg-background shrink-0 border-t px-4 py-4">
         <div className="mx-auto w-full max-w-2xl">
@@ -206,10 +265,23 @@ export default function Home() {
               className="max-h-50 flex-1 resize-none rounded-none border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-50"
             />
             <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={toggleVoice}
+              disabled={sending || !selectedConversation}
+              className={cn(
+                "h-8 w-8 shrink-0 rounded-lg",
+                listening && "text-destructive animate-pulse",
+              )}
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+            <Button
               size="icon"
               onClick={sendMessage}
               disabled={sending || !input.trim() || !selectedConversation}
-              className="h-8 w-8 shrink-0 cursor-pointer rounded-lg"
+              className="h-8 w-8 shrink-0 rounded-lg"
             >
               <ArrowUp className="h-4 w-4" />
             </Button>

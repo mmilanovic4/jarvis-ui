@@ -89,7 +89,7 @@ export function SidebarClient() {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton disabled={!models.length}>
                     {selectedModel ?? "Select model"}
                     <ChevronDown className="ml-auto" />
                   </SidebarMenuButton>

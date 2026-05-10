@@ -2,6 +2,7 @@ import { Outfit } from "next/font/google";
 import { SidebarClient } from "@/app/components";
 import { AppProvider } from "@/app/context/app-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
             </SidebarProvider>
           </TooltipProvider>
         </AppProvider>
+        <Toaster />
       </body>
     </html>
   );
