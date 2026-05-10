@@ -1,10 +1,12 @@
-import { Space_Grotesk } from "next/font/google";
-import SidebarClient from "./components/sidebar-client";
-import { AppProvider } from "./context/app-context";
+import { Outfit } from "next/font/google";
+import { SidebarClient } from "@/app/components";
+import { AppProvider } from "@/app/context/app-context";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-export const font = Space_Grotesk({
+export const font = Outfit({
   subsets: ["latin"],
 });
 
@@ -16,14 +18,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${font.className} subpixel-antialiased`}>
-      <body className="text-soft bg-base h-screen overflow-hidden">
+      <body className="flex h-screen overflow-hidden">
         <AppProvider>
-          <div className="flex h-screen overflow-hidden">
-            <SidebarClient />
-            <main className="bg-base flex flex-1 flex-col overflow-hidden">
-              {children}
-            </main>
-          </div>
+          <TooltipProvider>
+            <SidebarProvider className="flex flex-1 overflow-hidden">
+              <SidebarClient />
+              <main className="flex flex-1 flex-col overflow-hidden">
+                {children}
+              </main>
+            </SidebarProvider>
+          </TooltipProvider>
         </AppProvider>
       </body>
     </html>

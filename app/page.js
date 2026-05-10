@@ -1,6 +1,16 @@
 "use client";
+import { ArrowUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "@/app/context/app-context";
+import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { error, selectedConversation, selectedModel, setConversations } =
@@ -9,6 +19,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     async function loadMessages() {
@@ -16,14 +27,12 @@ export default function Home() {
         setMessages([]);
         return;
       }
-
       const res = await fetch(
         `/api/messages?conversationId=${selectedConversation.id}`,
       );
       const json = await res.json();
       setMessages(json.messages ?? []);
     }
-
     loadMessages();
   }, [selectedConversation]);
 
@@ -36,6 +45,7 @@ export default function Home() {
 
     const content = input.trim();
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     setMessages((prev) => [...prev, { role: "user", content }]);
     setSending(true);
 
@@ -71,119 +81,143 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3">
-        <p className="text-muted text-xs tracking-widest uppercase">{error}</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <p className="text-muted-foreground text-xs tracking-widest uppercase">
+          {error}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Messages */}
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-[10%] py-8">
-        {!selectedConversation ? (
-          <div className="mt-[20vh] flex h-full flex-1 flex-col items-center justify-center gap-4">
-            <span className="text-4xl">✦</span>
-            <h2 className="text-bright text-2xl font-semibold tracking-tight">
-              How can I help you?
-            </h2>
-            <p className="text-muted text-xs tracking-widest uppercase">
-              Local · Private · Offline
-            </p>
-          </div>
-        ) : messages.length === 0 && !sending ? (
-          <div className="mt-[20vh] flex h-full flex-1 flex-col items-center justify-center gap-2">
-            <p className="text-muted text-xs">Start the conversation...</p>
-          </div>
-        ) : (
-          messages.map((m, i) => (
-            <div
-              key={i}
-              className={`flex items-start gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
-            >
-              <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  m.role === "user"
-                    ? "bg-accent-dim text-accent-text"
-                    : "text-accent-light border-accent bg-surface-4 border"
-                }`}
-              >
-                {m.role === "user" ? "Y" : "J"}
-              </div>
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                  m.role === "user"
-                    ? "text-accent-text bg-surface-4 border-line-2 rounded-tr-sm border"
-                    : "text-soft rounded-tl-sm"
-                }`}
-              >
-                {m.content.split("\n").map((line, j, arr) => (
-                  <span key={j}>
-                    {line}
-                    {j < arr.length - 1 && <br />}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))
-        )}
-
-        {sending && (
-          <div className="flex items-start gap-3">
-            <div className="text-accent-light border-accent bg-surface-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold">
-              J
-            </div>
-            <div className="flex items-center gap-1.5 px-4 py-3">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="bg-accent h-1.5 w-1.5 animate-bounce rounded-full"
-                  style={{ animationDelay: `${i * 0.15}s` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div ref={bottomRef} />
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      {/* Sidebar trigger — top right */}
+      <div className="absolute top-3 right-4 z-10">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger />
+          </TooltipTrigger>
+          <TooltipContent side="left">Toggle sidebar</TooltipContent>
+        </Tooltip>
       </div>
 
-      {/* Input */}
-      <div className="border-line border-t px-[10%] py-4">
-        <div className="border-line bg-surface-2 flex items-end gap-2 rounded-2xl border px-4 py-3">
-          <textarea
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height =
-                Math.min(e.target.scrollHeight, 200) + "px";
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              selectedConversation
-                ? "Message Jarvis... (Shift+Enter for new line)"
-                : "Select or create a conversation first"
-            }
-            disabled={sending || !selectedConversation}
-            rows={1}
-            className="text-soft placeholder-muted max-h-50 flex-1 resize-none overflow-y-auto border-none bg-transparent font-sans text-sm leading-relaxed outline-none disabled:opacity-50"
-          />
-          <button
-            onClick={sendMessage}
-            disabled={sending || !input.trim() || !selectedConversation}
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base font-bold transition-colors duration-150 ${
-              sending || !input.trim() || !selectedConversation
-                ? "text-muted bg-line cursor-not-allowed"
-                : "text-bright bg-accent hover:bg-accent-hover cursor-pointer"
-            }`}
-          >
-            ↑
-          </button>
+      {/* Messages — jedino ovo skroluje */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-2xl px-4 py-12">
+          {!selectedConversation ? (
+            <div className="flex flex-col items-center justify-center gap-3 pt-[25vh] text-center">
+              <span className="text-4xl">✦</span>
+              <h2 className="text-foreground text-2xl font-semibold tracking-tight">
+                How can I help you?
+              </h2>
+              <p className="text-muted-foreground text-xs tracking-widest uppercase">
+                Local · Private · Offline
+              </p>
+            </div>
+          ) : messages.length === 0 && !sending ? (
+            <div className="flex flex-col items-center justify-center pt-[25vh]">
+              <p className="text-muted-foreground text-xs">
+                Start the conversation...
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex items-start gap-3",
+                    m.role === "user" && "flex-row-reverse",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                      m.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground border",
+                    )}
+                  >
+                    {m.role === "user" ? "Y" : "J"}
+                  </div>
+                  <div
+                    className={cn(
+                      "max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                      m.role === "user"
+                        ? "bg-primary text-primary-foreground rounded-tr-sm"
+                        : "bg-muted text-foreground rounded-tl-sm",
+                    )}
+                  >
+                    {m.content.split("\n").map((line, j, arr) => (
+                      <span key={j}>
+                        {line}
+                        {j < arr.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {sending && (
+                <div className="flex items-start gap-3">
+                  <div className="bg-muted flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold">
+                    J
+                  </div>
+                  <div className="bg-muted flex items-center gap-1.5 rounded-2xl rounded-tl-sm px-4 py-3.5">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="bg-muted-foreground h-1.5 w-1.5 animate-bounce rounded-full"
+                        style={{ animationDelay: `${i * 0.15}s` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+          )}
         </div>
-        <p className="text-line mt-2 text-center text-[10px] tracking-widest uppercase">
-          {selectedModel ?? "No model selected"} · Local
-        </p>
+      </div>
+
+      {/* Input — shrink-0 da ne raste i ne pomera messages */}
+      <div className="bg-background shrink-0 border-t px-4 py-4">
+        <div className="mx-auto w-full max-w-2xl">
+          <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">
+            <Textarea
+              id="user-input"
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height =
+                  Math.min(e.target.scrollHeight, 200) + "px";
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                selectedConversation
+                  ? "Message Jarvis... (Shift+Enter for new line)"
+                  : "Select or create a conversation first"
+              }
+              disabled={sending || !selectedConversation}
+              rows={1}
+              className="max-h-50 flex-1 resize-none rounded-none border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-50"
+            />
+            <Button
+              size="icon"
+              onClick={sendMessage}
+              disabled={sending || !input.trim() || !selectedConversation}
+              className="h-8 w-8 shrink-0 cursor-pointer rounded-lg"
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-muted-foreground mt-2 text-center text-[10px] tracking-widest uppercase">
+            {selectedModel ?? "No model selected"} · Local
+          </p>
+        </div>
       </div>
     </div>
   );
