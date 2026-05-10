@@ -14,8 +14,13 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function Home() {
-  const { error, selectedConversation, selectedModel, setConversations } =
-    useAppContext();
+  const {
+    status,
+    error,
+    selectedConversation,
+    selectedModel,
+    setConversations,
+  } = useAppContext();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -126,6 +131,8 @@ export default function Home() {
       </div>
     );
   }
+
+  if (!status) return null;
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
