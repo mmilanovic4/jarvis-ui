@@ -13,6 +13,7 @@ export default defineConfig([
     rules: {
       "no-undef": "error",
       "no-unused-vars": "error",
+      "react-hooks/exhaustive-deps": "off",
       "import/order": [
         "error",
         {

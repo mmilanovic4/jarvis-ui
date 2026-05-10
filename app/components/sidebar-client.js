@@ -6,6 +6,7 @@ import { uuid } from "@/app/lib/uuid";
 export default function SidebarClient() {
   const {
     status,
+    setError,
     selectedModel,
     setSelectedModel,
     selectedConversation,
@@ -21,13 +22,16 @@ export default function SidebarClient() {
 
     async function init() {
       const [modelsRes, convsRes] = await Promise.all([
-        fetch("/api/model"),
-        fetch("/api/conversation"),
+        fetch("/api/models"),
+        fetch("/api/conversations"),
       ]);
 
       const modelsJson = await modelsRes.json();
       setModels(modelsJson.models);
       setSelectedModel(modelsJson.models[0]);
+      if (modelsJson.models.length === 0) {
+        setError("No models found. Run `ollama pull llama3` to get started.");
+      }
 
       const convsJson = await convsRes.json();
       setConversations(convsJson.conversations);
@@ -46,17 +50,17 @@ export default function SidebarClient() {
   }
 
   if (!status) {
-    return <div className="p-4 text-xs text-[#4a4a60]">Ollama offline</div>;
+    return <div className="text-muted p-4 text-xs">Ollama offline</div>;
   }
 
   if (modelsLoading) {
-    return <div className="p-4 text-xs text-[#4a4a60]">...</div>;
+    return <div className="text-muted p-4 text-xs">...</div>;
   }
 
   return (
     <div className="flex flex-1 flex-col gap-1 overflow-hidden p-2">
       <select
-        className="mb-2 w-full cursor-pointer appearance-none rounded-lg border border-[#2a2a35] bg-[#1a1a22] px-3 py-2 font-sans text-xs text-[#a09fbe]"
+        className="border-line bg-surface-3 mb-2 w-full cursor-pointer appearance-none rounded-lg border px-3 py-2 font-sans text-xs text-[#a09fbe]"
         value={selectedModel ?? ""}
         onChange={(e) => setSelectedModel(e.target.value)}
       >
@@ -67,7 +71,7 @@ export default function SidebarClient() {
         ))}
       </select>
 
-      <span className="px-1.5 py-1 text-[10px] tracking-widest text-[#4a4a60] uppercase">
+      <span className="text-muted px-1.5 py-1 text-[10px] tracking-widest uppercase">
         Conversations
       </span>
 
@@ -78,8 +82,8 @@ export default function SidebarClient() {
             onClick={() => setSelectedConversation(conv)}
             className={`cursor-pointer truncate rounded-lg px-2.5 py-2 text-xs transition-colors duration-150 ${
               selectedConversation?.id === conv.id
-                ? "border border-[#3a3850] bg-[#1e1d2e] text-[#afa9ec]"
-                : "text-[#6b6a88] hover:bg-[#161620] hover:text-[#8a89a8]"
+                ? "text-accent-light bg-surface-4 border-line-2 border"
+                : "hover:bg-surface-2 text-subtle hover:text-dim"
             }`}
           >
             {conv.title ?? conv.id}
@@ -89,7 +93,7 @@ export default function SidebarClient() {
 
       <button
         onClick={handleNewConversation}
-        className="mt-2 w-full cursor-pointer rounded-lg border border-[#534ab7] bg-transparent px-3 py-2 text-left font-sans text-xs text-[#afa9ec] transition-colors duration-150 hover:bg-[#1e1d2e]"
+        className="text-accent-light border-accent hover:bg-surface-4 mt-2 w-full cursor-pointer rounded-lg border bg-transparent px-3 py-2 text-left font-sans text-xs transition-colors duration-150"
       >
         + New conversation
       </button>

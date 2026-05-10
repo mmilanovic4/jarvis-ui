@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "@/app/context/app-context";
 
 export default function Home() {
-  const { selectedConversation, selectedModel, setConversations } =
+  const { error, selectedConversation, selectedModel, setConversations } =
     useAppContext();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -18,7 +18,7 @@ export default function Home() {
       }
 
       const res = await fetch(
-        `/api/message?conversationId=${selectedConversation.id}`,
+        `/api/messages?conversationId=${selectedConversation.id}`,
       );
       const json = await res.json();
       setMessages(json.messages ?? []);
@@ -39,7 +39,7 @@ export default function Home() {
     setMessages((prev) => [...prev, { role: "user", content }]);
     setSending(true);
 
-    const res = await fetch("/api/message", {
+    const res = await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -69,6 +69,14 @@ export default function Home() {
     }
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <p className="text-muted text-xs tracking-widest uppercase">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Messages */}
@@ -76,16 +84,16 @@ export default function Home() {
         {!selectedConversation ? (
           <div className="mt-[20vh] flex h-full flex-1 flex-col items-center justify-center gap-4">
             <span className="text-4xl">✦</span>
-            <h2 className="text-2xl font-semibold tracking-tight text-[#e0dff8]">
+            <h2 className="text-bright text-2xl font-semibold tracking-tight">
               How can I help you?
             </h2>
-            <p className="text-xs tracking-widest text-[#4a4a60] uppercase">
+            <p className="text-muted text-xs tracking-widest uppercase">
               Local · Private · Offline
             </p>
           </div>
         ) : messages.length === 0 && !sending ? (
           <div className="mt-[20vh] flex h-full flex-1 flex-col items-center justify-center gap-2">
-            <p className="text-xs text-[#4a4a60]">Start the conversation...</p>
+            <p className="text-muted text-xs">Start the conversation...</p>
           </div>
         ) : (
           messages.map((m, i) => (
@@ -96,8 +104,8 @@ export default function Home() {
               <div
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
                   m.role === "user"
-                    ? "bg-[#26215c] text-[#cecbf6]"
-                    : "border border-[#534ab7] bg-[#1e1d2e] text-[#afa9ec]"
+                    ? "bg-accent-dim text-accent-text"
+                    : "text-accent-light border-accent bg-surface-4 border"
                 }`}
               >
                 {m.role === "user" ? "Y" : "J"}
@@ -105,8 +113,8 @@ export default function Home() {
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "rounded-tr-sm border border-[#3a3850] bg-[#1e1d2e] text-[#cecbf6]"
-                    : "rounded-tl-sm text-[#c0bedd]"
+                    ? "text-accent-text bg-surface-4 border-line-2 rounded-tr-sm border"
+                    : "text-soft rounded-tl-sm"
                 }`}
               >
                 {m.content.split("\n").map((line, j, arr) => (
@@ -122,14 +130,14 @@ export default function Home() {
 
         {sending && (
           <div className="flex items-start gap-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#534ab7] bg-[#1e1d2e] text-[11px] font-semibold text-[#afa9ec]">
+            <div className="text-accent-light border-accent bg-surface-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold">
               J
             </div>
             <div className="flex items-center gap-1.5 px-4 py-3">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#534ab7]"
+                  className="bg-accent h-1.5 w-1.5 animate-bounce rounded-full"
                   style={{ animationDelay: `${i * 0.15}s` }}
                 />
               ))}
@@ -141,8 +149,8 @@ export default function Home() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-[#2a2a35] px-[10%] py-4">
-        <div className="flex items-end gap-2 rounded-2xl border border-[#2a2a35] bg-[#161620] px-4 py-3">
+      <div className="border-line border-t px-[10%] py-4">
+        <div className="border-line bg-surface-2 flex items-end gap-2 rounded-2xl border px-4 py-3">
           <textarea
             value={input}
             onChange={(e) => {
@@ -159,21 +167,21 @@ export default function Home() {
             }
             disabled={sending || !selectedConversation}
             rows={1}
-            className="max-h-50 flex-1 resize-none overflow-y-auto border-none bg-transparent font-sans text-sm leading-relaxed text-[#c0bedd] placeholder-[#4a4a60] outline-none disabled:opacity-50"
+            className="text-soft placeholder-muted max-h-50 flex-1 resize-none overflow-y-auto border-none bg-transparent font-sans text-sm leading-relaxed outline-none disabled:opacity-50"
           />
           <button
             onClick={sendMessage}
             disabled={sending || !input.trim() || !selectedConversation}
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base font-bold transition-colors duration-150 ${
               sending || !input.trim() || !selectedConversation
-                ? "cursor-not-allowed bg-[#2a2a35] text-[#4a4a60]"
-                : "cursor-pointer bg-[#534ab7] text-[#e0dff8] hover:bg-[#6258cc]"
+                ? "text-muted bg-line cursor-not-allowed"
+                : "text-bright bg-accent hover:bg-accent-hover cursor-pointer"
             }`}
           >
             ↑
           </button>
         </div>
-        <p className="mt-2 text-center text-[10px] tracking-widest text-[#2a2a35] uppercase">
+        <p className="text-line mt-2 text-center text-[10px] tracking-widest uppercase">
           {selectedModel ?? "No model selected"} · Local
         </p>
       </div>
