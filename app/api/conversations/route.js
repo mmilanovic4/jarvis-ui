@@ -9,13 +9,14 @@ export async function GET() {
   return Response.json({ conversations });
 }
 
-export async function PATCH(req, { params }) {
-  const { title } = await req.json();
-  updateConversationTitle(params.id, title);
+export async function PATCH(req) {
+  const { id, title } = await req.json();
+  updateConversationTitle(id, title);
   return Response.json({ ok: true });
 }
 
-export async function DELETE(req, { params }) {
-  deleteConversation(params.id);
+export async function DELETE(req) {
+  const { id } = await req.json();
+  deleteConversation(id);
   return Response.json({ ok: true });
 }

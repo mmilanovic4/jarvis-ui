@@ -44,7 +44,8 @@ export function updateConversationTitle(id, title) {
 }
 
 export function deleteConversation(id) {
-  db.prepare("DELETE conversations WHERE id = ?").run(id);
+  db.prepare("DELETE FROM messages WHERE conversation_id = ?").run(id);
+  db.prepare("DELETE FROM conversations WHERE id = ?").run(id);
 }
 
 export function getMessages(conversationId) {
