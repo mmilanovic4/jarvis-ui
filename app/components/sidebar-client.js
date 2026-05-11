@@ -58,7 +58,6 @@ export function SidebarClient() {
     setConversations,
   } = useAppContext();
   const [models, setModels] = useState([]);
-  const [modelsLoading, setModelsLoading] = useState(true);
   const [renameConv, setRenameConv] = useState(null);
   const [renameTitle, setRenameTitle] = useState("");
   const [deleteConv, setDeleteConv] = useState(null);
@@ -81,8 +80,6 @@ export function SidebarClient() {
 
       const convsJson = await convsRes.json();
       setConversations(convsJson.conversations);
-
-      setModelsLoading(false);
     }
 
     init();
