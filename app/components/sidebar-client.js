@@ -112,16 +112,28 @@ export function SidebarClient() {
         <SidebarGroup>
           <SidebarGroupLabel>Conversations</SidebarGroupLabel>
           <SidebarMenu>
-            {conversations.map((conversation) => (
-              <SidebarMenuItem key={conversation.id}>
-                <SidebarMenuButton
-                  isActive={selectedConversation?.id === conversation.id}
-                  onClick={() => handleSelectConversation(conversation)}
-                >
-                  {conversation.title ?? conversation.id}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {conversations.map((conversation) => {
+              const isActive = selectedConversation?.id === conversation.id;
+              return (
+                <SidebarMenuItem key={conversation.id}>
+                  {isActive ? (
+                    <SidebarMenuButton
+                      isActive
+                      onClick={() => handleSelectConversation(conversation)}
+                    >
+                      {conversation.title ?? conversation.id}
+                    </SidebarMenuButton>
+                  ) : (
+                    <button
+                      onClick={() => handleSelectConversation(conversation)}
+                      className="text-muted-foreground hover:text-foreground w-full cursor-pointer truncate px-2 py-1.5 text-left text-sm transition-colors"
+                    >
+                      {conversation.title ?? conversation.id}
+                    </button>
+                  )}
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
