@@ -5,6 +5,12 @@ import { useAppContext } from "@/app/context/app-context";
 import { uuid } from "@/app/lib/uuid";
 import { Button } from "@/components/ui/button";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -115,23 +121,31 @@ export function SidebarClient() {
             {conversations.map((conversation) => {
               const isActive = selectedConversation?.id === conversation.id;
               return (
-                <SidebarMenuItem key={conversation.id}>
-                  {isActive ? (
-                    <SidebarMenuButton
-                      isActive
-                      onClick={() => handleSelectConversation(conversation)}
-                    >
-                      {conversation.title ?? conversation.id}
-                    </SidebarMenuButton>
-                  ) : (
-                    <button
-                      onClick={() => handleSelectConversation(conversation)}
-                      className="text-muted-foreground hover:text-foreground w-full cursor-pointer truncate px-2 py-1.5 text-left text-sm transition-colors"
-                    >
-                      {conversation.title ?? conversation.id}
-                    </button>
-                  )}
-                </SidebarMenuItem>
+                <ContextMenu key={conversation.id}>
+                  <ContextMenuTrigger>
+                    <SidebarMenuItem>
+                      {isActive ? (
+                        <SidebarMenuButton
+                          isActive
+                          onClick={() => handleSelectConversation(conversation)}
+                        >
+                          {conversation.title ?? conversation.id}
+                        </SidebarMenuButton>
+                      ) : (
+                        <button
+                          onClick={() => handleSelectConversation(conversation)}
+                          className="text-muted-foreground hover:text-foreground w-full cursor-pointer truncate px-2 py-1.5 text-left text-sm transition-colors"
+                        >
+                          {conversation.title ?? conversation.id}
+                        </button>
+                      )}
+                    </SidebarMenuItem>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem>Rename</ContextMenuItem>
+                    <ContextMenuItem>Delete</ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               );
             })}
           </SidebarMenu>

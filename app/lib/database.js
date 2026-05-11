@@ -39,6 +39,14 @@ export function createConversation(model, title, id) {
   return id;
 }
 
+export function updateConversationTitle(id, title) {
+  db.prepare("UPDATE conversations SET title = ? WHERE id = ?").run(title, id);
+}
+
+export function deleteConversation(id) {
+  db.prepare("DELETE conversations WHERE id = ?").run(id);
+}
+
 export function getMessages(conversationId) {
   return db
     .prepare(
