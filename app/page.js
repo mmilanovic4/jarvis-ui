@@ -125,7 +125,7 @@ export default function Home() {
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2">
-        <p className="text-muted-foreground text-xs tracking-widest uppercase">
+        <p className="text-muted-foreground text-center text-xs tracking-widest uppercase">
           {error}
         </p>
       </div>
