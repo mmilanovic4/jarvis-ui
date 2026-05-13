@@ -14,10 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./components/theme-toggle";
 
-function SearchInput({ value, onChange }) {
+function SearchInput({ disabled, value, onChange }) {
   return (
     <InputGroup className="max-w-xs">
       <InputGroupInput
+        disabled={disabled}
         placeholder="Search..."
         value={value}
         onChange={onChange}
@@ -176,7 +177,11 @@ export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
-        <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} />
+        <SearchInput
+          disabled={!selectedConversation}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <ThemeToggle />
         <SidebarTrigger />
       </div>
