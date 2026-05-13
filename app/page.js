@@ -1,34 +1,13 @@
 "use client";
-import { ArrowUp, Mic, Search } from "lucide-react";
+import { ArrowUp, Mic, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./components/theme-toggle";
-
-function SearchInput({ disabled, value, onChange }) {
-  return (
-    <InputGroup className="max-w-xs">
-      <InputGroupInput
-        disabled={disabled}
-        placeholder="Search..."
-        value={value}
-        onChange={onChange}
-      />
-      <InputGroupAddon>
-        <Search />
-      </InputGroupAddon>
-    </InputGroup>
-  );
-}
 
 export default function Home() {
   const {
@@ -42,10 +21,26 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [listening, setListening] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setQuery("");
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     async function loadMessages() {
@@ -177,14 +172,51 @@ export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
-        <SearchInput
+        <Button
+          variant="ghost"
+          size="icon"
           disabled={!selectedConversation}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+          onClick={() => setSearchOpen(true)}
+        >
+          <Search className="h-4 w-4" />
+        </Button>
         <ThemeToggle />
         <SidebarTrigger />
       </div>
+
+      {searchOpen && (
+        <div className="bg-background flex items-center gap-2 border-b px-4 py-2">
+          <Search className="text-muted-foreground h-4 w-4 shrink-0" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search messages... (Esc to close)"
+            className="placeholder:text-muted-foreground flex-1 bg-transparent text-sm outline-none"
+          />
+          {query && (
+            <span className="text-muted-foreground text-xs">
+              {
+                messages.filter((m) =>
+                  m.content.toLowerCase().includes(query.toLowerCase()),
+                ).length
+              }{" "}
+              results
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => {
+              setSearchOpen(false);
+              setQuery("");
+            }}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl px-4 py-12">
