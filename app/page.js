@@ -1,6 +1,6 @@
 "use client";
-import { ArrowUp, Mic, Search, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ArrowUp, HomeIcon, Mic, Search, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export default function Home() {
     status,
     error,
     selectedConversation,
+    setSelectedConversation,
     selectedModel,
     setConversations,
   } = useAppContext();
@@ -27,20 +28,24 @@ export default function Home() {
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  useEffect(() => {
-    function onKeyDown(e) {
+  const onKeyDown = useCallback(
+    (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "f") {
         e.preventDefault();
-        setSearchOpen(true);
+        if (!selectedConversation) return;
+        setSearchOpen((x) => !x);
       }
       if (e.key === "Escape") {
         setSearchOpen(false);
-        setQuery("");
       }
-    }
+    },
+    [selectedConversation],
+  );
+
+  useEffect(() => {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [onKeyDown]);
 
   useEffect(() => {
     async function loadMessages() {
@@ -136,7 +141,7 @@ export default function Home() {
   }
 
   function highlightText(content, query) {
-    if (!query.trim()) return <>{content}</>;
+    if (!searchOpen || !query.trim()) return <>{content}</>;
 
     const parts = content.split(new RegExp(`(${query})`, "gi"));
     return (
@@ -172,11 +177,24 @@ export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
+        <div className="mr-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setSearchOpen(false);
+              setQuery("");
+              setSelectedConversation(null);
+            }}
+          >
+            <HomeIcon className="h-4 w-4" />
+          </Button>
+        </div>
         <Button
           variant="ghost"
           size="icon"
           disabled={!selectedConversation}
-          onClick={() => setSearchOpen(true)}
+          onClick={() => setSearchOpen((x) => !x)}
         >
           <Search className="h-4 w-4" />
         </Button>
@@ -191,7 +209,7 @@ export default function Home() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search messages... (Esc to close)"
+            placeholder="Search this conversation... (esc to close)"
             className="placeholder:text-muted-foreground flex-1 bg-transparent text-sm outline-none"
           />
           {query && (
@@ -314,7 +332,7 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder={
                 selectedConversation
-                  ? "Message Jarvis... (Shift+Enter for new line)"
+                  ? "Message Jarvis... (Shift + Enter for new line)"
                   : "Select or create a conversation first"
               }
               disabled={sending || !selectedConversation}

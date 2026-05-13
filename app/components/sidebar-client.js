@@ -292,7 +292,7 @@ export function SidebarClient() {
 
         <SidebarFooter className="border border-t">
           <Button
-            variant="outline"
+            disabled={!status}
             className="w-full cursor-pointer"
             onClick={handleNewConversation}
           >
