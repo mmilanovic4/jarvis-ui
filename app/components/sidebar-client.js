@@ -23,6 +23,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -61,6 +62,9 @@ function RenameDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rename conversation</DialogTitle>
+          <DialogDescription>
+            Enter a new name for this conversation.
+          </DialogDescription>
         </DialogHeader>
         <Input
           autoFocus
