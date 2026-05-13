@@ -1,13 +1,33 @@
 "use client";
-import { ArrowUp, Mic } from "lucide-react";
+import { ArrowUp, Mic, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./components/theme-toggle";
+
+function SearchInput({ value, onChange }) {
+  return (
+    <InputGroup className="max-w-xs">
+      <InputGroupInput
+        placeholder="Search..."
+        value={value}
+        onChange={onChange}
+      />
+      <InputGroupAddon>
+        <Search />
+      </InputGroupAddon>
+    </InputGroup>
+  );
+}
 
 export default function Home() {
   const {
@@ -21,6 +41,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [listening, setListening] = useState(false);
+  const [query, setQuery] = useState("");
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -118,6 +139,28 @@ export default function Home() {
     setListening(true);
   }
 
+  function highlightText(content, query) {
+    if (!query.trim()) return <>{content}</>;
+
+    const parts = content.split(new RegExp(`(${query})`, "gi"));
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === query.toLowerCase() ? (
+            <mark
+              key={i}
+              className="rounded-sm bg-yellow-300 px-0.5 dark:bg-yellow-600"
+            >
+              {part}
+            </mark>
+          ) : (
+            part
+          ),
+        )}
+      </>
+    );
+  }
+
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2">
@@ -133,6 +176,7 @@ export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
+        <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} />
         <ThemeToggle />
         <SidebarTrigger />
       </div>
@@ -185,7 +229,7 @@ export default function Home() {
                   >
                     {m.content.split("\n").map((line, j, arr) => (
                       <span key={j}>
-                        {line}
+                        {highlightText(line, query)}
                         {j < arr.length - 1 && <br />}
                       </span>
                     ))}
@@ -220,6 +264,7 @@ export default function Home() {
         <div className="mx-auto w-full max-w-2xl">
           <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">
             <Textarea
+              autoFocus
               id="user-input"
               ref={textareaRef}
               value={input}

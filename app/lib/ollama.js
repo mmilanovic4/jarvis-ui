@@ -5,7 +5,7 @@ const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
 const ollama = new Ollama({ host: OLLAMA_URL });
 
 const SYSTEM_PROMPT =
-  "You are Jarvis, a personal AI assistant. You are helpful, concise, and friendly.";
+  "You are Jarvis, a personal AI assistant. You are helpful, concise and friendly.";
 
 export async function checkStatus() {
   try {
