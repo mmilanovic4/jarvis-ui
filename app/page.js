@@ -136,8 +136,7 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
-      {/* Sidebar trigger — top right */}
-      <div className="absolute top-3 right-4 z-10">
+      <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarTrigger />
