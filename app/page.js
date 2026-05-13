@@ -6,12 +6,8 @@ import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./components/theme-toggle";
 
 export default function Home() {
   const {
@@ -137,12 +133,8 @@ export default function Home() {
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-end border-b px-4 py-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SidebarTrigger />
-          </TooltipTrigger>
-          <TooltipContent side="left">Toggle sidebar</TooltipContent>
-        </Tooltip>
+        <ThemeToggle />
+        <SidebarTrigger />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -224,27 +216,6 @@ export default function Home() {
         </div>
       </div>
 
-      {listening && (
-        <div className="bg-background/80 absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
-          <div className="relative flex items-center justify-center">
-            <span className="bg-destructive/20 absolute h-16 w-16 animate-ping rounded-full" />
-            <span className="bg-destructive/40 absolute h-12 w-12 animate-ping rounded-full [animation-delay:0.2s]" />
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={toggleVoice}
-              className="relative h-14 w-14 rounded-full"
-            >
-              <Mic className="h-6 w-6" />
-            </Button>
-          </div>
-          <p className="text-muted-foreground animate-pulse text-sm tracking-widest uppercase">
-            Listening...
-          </p>
-          <p className="text-muted-foreground text-xs">Click to stop</p>
-        </div>
-      )}
-
       <div className="bg-background shrink-0 border-t px-4 py-4">
         <div className="mx-auto w-full max-w-2xl">
           <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">
@@ -266,7 +237,7 @@ export default function Home() {
               }
               disabled={sending || !selectedConversation}
               rows={1}
-              className="max-h-50 flex-1 resize-none rounded-none border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-50"
+              className="max-h-50 flex-1 resize-none rounded-none border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-50 dark:bg-transparent dark:disabled:bg-transparent"
             />
             <Button
               type="button"
@@ -275,8 +246,10 @@ export default function Home() {
               onClick={toggleVoice}
               disabled={sending || !selectedConversation}
               className={cn(
-                "h-8 w-8 shrink-0 rounded-lg",
-                listening && "text-destructive animate-pulse",
+                "h-8 w-8 shrink-0 rounded-lg transition-colors",
+                listening
+                  ? "text-destructive bg-destructive/10 animate-pulse"
+                  : "text-muted-foreground",
               )}
             >
               <Mic className="h-4 w-4" />

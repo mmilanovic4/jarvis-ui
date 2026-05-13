@@ -18,7 +18,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${font.className} subpixel-antialiased`}>
+    <html
+      suppressHydrationWarning
+      lang="en"
+      className={`${font.className} subpixel-antialiased`}
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        try {
+          var theme = localStorage.getItem('theme');
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+        } catch(e) {}
+      `,
+          }}
+        />
+      </head>
       <body className="flex h-screen overflow-hidden">
         <AppProvider>
           <TooltipProvider>

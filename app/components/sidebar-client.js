@@ -205,8 +205,8 @@ export function SidebarClient() {
   return (
     <>
       <Sidebar>
-        <SidebarHeader className="border-sidebar-border border-b">
-          <div className="flex items-center gap-2 px-2 py-1">
+        <SidebarHeader className="border-b">
+          <div className="flex h-8 items-center gap-2 px-4">
             <div className="bg-primary h-2 w-2 shrink-0 rounded-full" />
             <span className="text-sm font-semibold tracking-widest uppercase">
               Jarvis
@@ -290,7 +290,7 @@ export function SidebarClient() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-sidebar-border border-t">
+        <SidebarFooter className="border border-t">
           <Button
             variant="outline"
             className="w-full cursor-pointer"
