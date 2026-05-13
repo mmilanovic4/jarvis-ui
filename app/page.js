@@ -145,7 +145,6 @@ export default function Home() {
         </Tooltip>
       </div>
 
-      {/* Messages — jedino ovo skroluje */}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl px-4 py-12">
           {!selectedConversation ? (
@@ -246,7 +245,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Input — shrink-0 da ne raste i ne pomera messages */}
       <div className="bg-background shrink-0 border-t px-4 py-4">
         <div className="mx-auto w-full max-w-2xl">
           <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">

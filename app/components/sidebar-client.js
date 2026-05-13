@@ -46,6 +46,71 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+function RenameDialog({
+  renameConv,
+  setRenameConv,
+  renameTitle,
+  setRenameTitle,
+  handleRenameSubmit,
+}) {
+  return (
+    <Dialog
+      open={!!renameConv}
+      onOpenChange={(open) => !open && setRenameConv(null)}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Rename conversation</DialogTitle>
+        </DialogHeader>
+        <Input
+          autoFocus
+          value={renameTitle}
+          onChange={(e) => setRenameTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleRenameSubmit();
+            if (e.key === "Escape") setRenameConv(null);
+          }}
+          placeholder="Conversation name"
+        />
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setRenameConv(null)}>
+            Cancel
+          </Button>
+          <Button onClick={handleRenameSubmit}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteDialog({ deleteConv, setDeleteConv, handleDeleteConfirm }) {
+  return (
+    <AlertDialog
+      open={!!deleteConv}
+      onOpenChange={(open) => !open && setDeleteConv(null)}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete &quot;{deleteConv?.title}&quot; and all
+            its messages. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={handleDeleteConfirm}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export function SidebarClient() {
   const {
     status,
@@ -233,58 +298,19 @@ export function SidebarClient() {
         </SidebarFooter>
       </Sidebar>
 
-      {/* Rename dialog */}
-      <Dialog
-        open={!!renameConv}
-        onOpenChange={(open) => !open && setRenameConv(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename conversation</DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus
-            value={renameTitle}
-            onChange={(e) => setRenameTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleRenameSubmit();
-              if (e.key === "Escape") setRenameConv(null);
-            }}
-            placeholder="Conversation name"
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameConv(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleRenameSubmit}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RenameDialog
+        renameConv={renameConv}
+        setRenameConv={setRenameConv}
+        renameTitle={renameTitle}
+        setRenameTitle={setRenameTitle}
+        handleRenameSubmit={handleRenameSubmit}
+      />
 
-      {/* Delete confirm dialog */}
-      <AlertDialog
-        open={!!deleteConv}
-        onOpenChange={(open) => !open && setDeleteConv(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete &quot;{deleteConv?.title}&quot; and
-              all its messages. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={handleDeleteConfirm}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        deleteConv={deleteConv}
+        setDeleteConv={setDeleteConv}
+        handleDeleteConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }
