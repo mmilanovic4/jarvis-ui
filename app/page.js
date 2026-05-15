@@ -122,14 +122,12 @@ export default function Home() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
 
     recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
+      const transcript = e.results[e.results.length - 1][0].transcript;
       setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      recognition.stop();
-      setListening(false);
     };
 
     recognition.onend = () => setListening(false);
@@ -348,7 +346,7 @@ export default function Home() {
               className={cn(
                 "h-8 w-8 shrink-0 rounded-lg transition-colors",
                 listening
-                  ? "text-destructive bg-destructive/10 animate-pulse"
+                  ? "bg-destructive text-destructive-foreground animate-pulse"
                   : "text-muted-foreground",
               )}
             >
