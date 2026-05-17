@@ -1,4 +1,5 @@
 import {
+  createConversation,
   deleteConversation,
   getConversations,
   updateConversationTitle,
@@ -7,6 +8,12 @@ import {
 export async function GET() {
   const conversations = getConversations();
   return Response.json({ conversations });
+}
+
+export async function POST(req) {
+  const { id, model, title } = await req.json();
+  createConversation(id, model, title);
+  return Response.json({ id });
 }
 
 export async function PATCH(req) {

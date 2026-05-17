@@ -6,7 +6,7 @@ const AppContext = createContext(null);
 export function AppProvider({ children }) {
   const [status, setStatus] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedModel, setSelectedModel] = useState(null);
+  const [models, setModels] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
 
@@ -31,8 +31,8 @@ export function AppProvider({ children }) {
         status,
         error,
         setError,
-        selectedModel,
-        setSelectedModel,
+        models,
+        setModels,
         selectedConversation,
         setSelectedConversation,
         conversations,

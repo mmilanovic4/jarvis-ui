@@ -1,6 +1,5 @@
 import {
   getConversation,
-  createConversation,
   getMessages,
   createMessage,
 } from "@/app/lib/database";
@@ -22,7 +21,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const { conversationId, content, model } = await req.json();
+  const { conversationId, content } = await req.json();
 
   if (!conversationId) {
     return Response.json(
@@ -31,15 +30,13 @@ export async function POST(req) {
     );
   }
 
-  let conv = getConversation(conversationId);
+  const conv = getConversation(conversationId);
 
   if (!conv) {
-    createConversation(model, content.slice(0, 50), conversationId);
-    conv = getConversation(conversationId);
+    return Response.json({ error: "Conversation not found" }, { status: 400 });
   }
 
   const history = getMessages(conversationId);
-
   createMessage(conversationId, "user", content);
 
   const messages = [
@@ -48,7 +45,6 @@ export async function POST(req) {
   ];
 
   const response = await chat(conv.model, messages);
-
   createMessage(conversationId, "assistant", response);
 
   return Response.json({ message: response, title: conv.title });

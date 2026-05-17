@@ -13,6 +13,7 @@ export default function Home() {
   const {
     status,
     error,
+    models,
     selectedConversation,
     setSelectedConversation,
     selectedModel,
@@ -27,6 +28,9 @@ export default function Home() {
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  const modelAvailable = models.includes(selectedConversation?.model);
+  const inputDisabled = sending || !selectedConversation || !modelAvailable;
 
   const onKeyDown = useCallback(
     (e) => {
@@ -72,7 +76,6 @@ export default function Home() {
     const content = input.trim();
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
-    setMessages((prev) => [...prev, { role: "user", content }]);
     setSending(true);
 
     const res = await fetch("/api/messages", {
@@ -88,6 +91,7 @@ export default function Home() {
     const data = await res.json();
     setMessages((prev) => [
       ...prev,
+      { role: "user", content },
       { role: "assistant", content: data.message },
     ]);
     setConversations((prev) =>
@@ -313,6 +317,13 @@ export default function Home() {
         </div>
       </div>
 
+      {selectedConversation && !modelAvailable && (
+        <p className="text-destructive mb-2 text-center text-xs">
+          Model &quot;{selectedConversation.model}&quot; is no longer available.
+          Please create a new conversation.
+        </p>
+      )}
+
       <div className="bg-background shrink-0 border-t px-4 py-4">
         <div className="mx-auto w-full max-w-2xl">
           <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">
@@ -333,7 +344,7 @@ export default function Home() {
                   ? "Message Jarvis... (Shift + Enter for new line)"
                   : "Select or create a conversation first"
               }
-              disabled={sending || !selectedConversation}
+              disabled={inputDisabled}
               rows={1}
               className="max-h-50 flex-1 resize-none rounded-none border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-50 dark:bg-transparent dark:disabled:bg-transparent"
             />
@@ -342,7 +353,7 @@ export default function Home() {
               size="icon"
               variant="ghost"
               onClick={toggleVoice}
-              disabled={sending || !selectedConversation}
+              disabled={inputDisabled}
               className={cn(
                 "h-8 w-8 shrink-0 rounded-lg transition-colors",
                 listening

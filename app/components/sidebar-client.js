@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAppContext } from "@/app/context/app-context";
 import { uuid } from "@/app/lib/uuid";
@@ -28,13 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sidebar,
   SidebarContent,
@@ -47,47 +48,94 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-function RenameDialog({
-  renameConv,
-  setRenameConv,
-  renameTitle,
-  setRenameTitle,
-  handleRenameSubmit,
+function ConversationDialog({
+  open,
+  onOpenChange,
+  mode,
+  title,
+  setTitle,
+  model,
+  setModel,
+  models,
+  onSubmit,
+  loading,
 }) {
+  const isCreate = mode === "create";
+
   return (
-    <Dialog
-      open={!!renameConv}
-      onOpenChange={(open) => !open && setRenameConv(null)}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename conversation</DialogTitle>
+          <DialogTitle>
+            {isCreate ? "New conversation" : "Edit conversation"}
+          </DialogTitle>
           <DialogDescription>
-            Enter a new name for this conversation.
+            {isCreate
+              ? "Choose a title and model for your new conversation."
+              : "Update the title of this conversation."}
           </DialogDescription>
         </DialogHeader>
-        <Input
-          autoFocus
-          value={renameTitle}
-          onChange={(e) => setRenameTitle(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleRenameSubmit();
-            if (e.key === "Escape") setRenameConv(null);
-          }}
-          placeholder="Conversation name"
-        />
+
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Title</label>
+            <Input
+              autoFocus
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onSubmit();
+              }}
+              placeholder="Conversation title"
+              disabled={loading}
+            />
+          </div>
+
+          {isCreate && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">Model</label>
+              <Select value={model} onValueChange={setModel} disabled={loading}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((m) => (
+                    <SelectItem key={m} value={m} className="px-3 py-2.5">
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
         <DialogFooter>
-          <Button variant="outline" onClick={() => setRenameConv(null)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
             Cancel
           </Button>
-          <Button onClick={handleRenameSubmit}>Save</Button>
+          <Button
+            onClick={onSubmit}
+            disabled={loading || !title.trim() || (isCreate && !model)}
+          >
+            {loading ? "Saving..." : "Save"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function DeleteDialog({ deleteConv, setDeleteConv, handleDeleteConfirm }) {
+function DeleteDialog({
+  deleteConv,
+  setDeleteConv,
+  handleDeleteConfirm,
+  loading,
+}) {
   return (
     <AlertDialog
       open={!!deleteConv}
@@ -102,12 +150,13 @@ function DeleteDialog({ deleteConv, setDeleteConv, handleDeleteConfirm }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={handleDeleteConfirm}
+            disabled={loading}
           >
-            Delete
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -119,17 +168,22 @@ export function SidebarClient() {
   const {
     status,
     setError,
-    selectedModel,
-    setSelectedModel,
+    models,
+    setModels,
     selectedConversation,
     setSelectedConversation,
     conversations,
     setConversations,
   } = useAppContext();
-  const [models, setModels] = useState([]);
-  const [renameConv, setRenameConv] = useState(null);
-  const [renameTitle, setRenameTitle] = useState("");
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState("create");
+  const [dialogConv, setDialogConv] = useState(null);
+  const [dialogTitle, setDialogTitle] = useState("New conversation");
+  const [dialogModel, setDialogModel] = useState("");
+  const [dialogLoading, setDialogLoading] = useState(false);
   const [deleteConv, setDeleteConv] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!status) return;
@@ -142,7 +196,6 @@ export function SidebarClient() {
 
       const modelsJson = await modelsRes.json();
       setModels(modelsJson.models);
-      setSelectedModel(modelsJson.models[0]);
       if (modelsJson.models.length === 0) {
         setError("No models found. Run `ollama pull llama3` to get started.");
       }
@@ -154,52 +207,78 @@ export function SidebarClient() {
     init();
   }, [status]);
 
-  function handleNewConversation() {
-    const id = uuid();
-    const conv = { id, title: "New conversation" };
-    setConversations((prev) => [conv, ...prev]);
-    setSelectedConversation(conv);
+  function openCreateDialog() {
+    setDialogMode("create");
+    setDialogConv(null);
+    setDialogTitle("New conversation");
+    setDialogModel(models[0] ?? "");
+    setDialogOpen(true);
   }
 
-  function handleSelectConversation(conv) {
-    setSelectedConversation(conv);
+  function openEditDialog(conv) {
+    setDialogMode("edit");
+    setDialogConv(conv);
+    setDialogTitle(conv.title ?? "");
+    setDialogModel("");
+    setDialogOpen(true);
   }
 
-  function handleRenameOpen(conv) {
-    setRenameConv(conv);
-    setRenameTitle(conv.title ?? "");
-  }
+  async function handleDialogSubmit() {
+    if (!dialogTitle.trim()) return;
 
-  async function handleRenameSubmit() {
-    if (!renameTitle.trim() || !renameConv) return;
+    setDialogLoading(true);
 
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === renameConv.id ? { ...c, title: renameTitle.trim() } : c,
-      ),
-    );
-    setRenameConv(null);
+    if (dialogMode === "create") {
+      const id = uuid();
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          model: dialogModel,
+          title: dialogTitle.trim(),
+        }),
+      });
+      const data = await res.json();
+      const conv = {
+        id: data.id,
+        model: dialogModel,
+        title: dialogTitle.trim(),
+      };
+      setConversations((prev) => [conv, ...prev]);
+      setSelectedConversation(conv);
+    } else {
+      await fetch("/api/conversations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: dialogConv.id, title: dialogTitle.trim() }),
+      });
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === dialogConv.id ? { ...c, title: dialogTitle.trim() } : c,
+        ),
+      );
+    }
 
-    await fetch("/api/conversations", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: renameConv.id, title: renameTitle.trim() }),
-    });
+    setDialogLoading(false);
+    setDialogOpen(false);
   }
 
   async function handleDeleteConfirm() {
     if (!deleteConv) return;
 
-    setConversations((prev) => prev.filter((c) => c.id !== deleteConv.id));
-    if (selectedConversation?.id === deleteConv.id) {
-      setSelectedConversation(null);
-    }
-    setDeleteConv(null);
-
+    setDeleteLoading(true);
     await fetch("/api/conversations", {
       method: "DELETE",
       body: JSON.stringify({ id: deleteConv.id }),
     });
+
+    setConversations((prev) => prev.filter((c) => c.id !== deleteConv.id));
+    if (selectedConversation?.id === deleteConv.id) {
+      setSelectedConversation(null);
+    }
+    setDeleteLoading(false);
+    setDeleteConv(null);
   }
 
   return (
@@ -216,31 +295,6 @@ export function SidebarClient() {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton disabled={!models.length}>
-                      {selectedModel ?? "Select model"}
-                      <ChevronDown className="ml-auto" />
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-                    {models.map((model) => (
-                      <DropdownMenuItem
-                        key={model}
-                        onClick={() => setSelectedModel(model)}
-                      >
-                        {model}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-
-          <SidebarGroup>
             <SidebarGroupLabel>Conversations</SidebarGroupLabel>
             <SidebarMenu>
               {conversations.map((conversation) => {
@@ -253,7 +307,7 @@ export function SidebarClient() {
                           <SidebarMenuButton
                             isActive
                             onClick={() =>
-                              handleSelectConversation(conversation)
+                              setSelectedConversation(conversation)
                             }
                           >
                             {conversation.title ?? conversation.id}
@@ -261,7 +315,7 @@ export function SidebarClient() {
                         ) : (
                           <button
                             onClick={() =>
-                              handleSelectConversation(conversation)
+                              setSelectedConversation(conversation)
                             }
                             className="text-muted-foreground hover:text-foreground w-full cursor-pointer truncate px-2 py-1.5 text-left text-sm transition-colors"
                           >
@@ -272,9 +326,9 @@ export function SidebarClient() {
                     </ContextMenuTrigger>
                     <ContextMenuContent>
                       <ContextMenuItem
-                        onClick={() => handleRenameOpen(conversation)}
+                        onClick={() => openEditDialog(conversation)}
                       >
-                        Rename
+                        Edit
                       </ContextMenuItem>
                       <ContextMenuItem
                         className="text-destructive focus:text-destructive"
@@ -290,11 +344,11 @@ export function SidebarClient() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border border-t">
+        <SidebarFooter className="border-t">
           <Button
-            disabled={!status}
+            disabled={!status || !models.length}
             className="w-full cursor-pointer"
-            onClick={handleNewConversation}
+            onClick={openCreateDialog}
           >
             <Plus />
             New Chat
@@ -302,18 +356,24 @@ export function SidebarClient() {
         </SidebarFooter>
       </Sidebar>
 
-      <RenameDialog
-        renameConv={renameConv}
-        setRenameConv={setRenameConv}
-        renameTitle={renameTitle}
-        setRenameTitle={setRenameTitle}
-        handleRenameSubmit={handleRenameSubmit}
+      <ConversationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        mode={dialogMode}
+        title={dialogTitle}
+        setTitle={setDialogTitle}
+        model={dialogModel}
+        setModel={setDialogModel}
+        models={models}
+        onSubmit={handleDialogSubmit}
+        loading={dialogLoading}
       />
 
       <DeleteDialog
         deleteConv={deleteConv}
         setDeleteConv={setDeleteConv}
         handleDeleteConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
       />
     </>
   );

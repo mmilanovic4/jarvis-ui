@@ -32,7 +32,7 @@ export function getConversation(id) {
   return db.prepare("SELECT * FROM conversations WHERE id = ?").get(id);
 }
 
-export function createConversation(model, title, id) {
+export function createConversation(id, model, title) {
   db.prepare(
     "INSERT INTO conversations (id, model, title) VALUES (?, ?, ?)",
   ).run(id, model, title);
