@@ -16,7 +16,6 @@ export default function Home() {
     models,
     selectedConversation,
     setSelectedConversation,
-    selectedModel,
     setConversations,
   } = useAppContext();
   const [messages, setMessages] = useState([]);
@@ -84,7 +83,6 @@ export default function Home() {
       body: JSON.stringify({
         conversationId: selectedConversation.id,
         content,
-        model: selectedModel,
       }),
     });
 
@@ -373,7 +371,7 @@ export default function Home() {
             </Button>
           </div>
           <p className="text-muted-foreground mt-2 text-center text-[10px] tracking-widest uppercase">
-            {selectedModel ?? "No model selected"} · Local
+            {selectedConversation?.model ?? "No model selected"} · Local
           </p>
         </div>
       </div>
