@@ -69,6 +69,10 @@ export default function Home() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [selectedConversation]);
+
   async function sendMessage() {
     if (!input.trim() || sending || !selectedConversation) return;
 
