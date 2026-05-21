@@ -287,7 +287,7 @@ export function SidebarClient() {
         <SidebarHeader className="border-b">
           <div className="flex h-8 items-center gap-2 px-4">
             <div className="bg-primary h-2 w-2 shrink-0 rounded-full" />
-            <span className="text-sm font-semibold tracking-widest uppercase">
+            <span className="text-sm font-semibold tracking-widest uppercase select-none">
               Jarvis
             </span>
           </div>
@@ -332,7 +332,12 @@ export function SidebarClient() {
                       </ContextMenuItem>
                       <ContextMenuItem
                         className="text-destructive focus:text-destructive"
-                        onClick={() => setDeleteConv(conversation)}
+                        onClick={() => {
+                          setDeleteConv(conversation);
+                          if (conversation.id === selectedConversation) {
+                            setSelectedConversation(null);
+                          }
+                        }}
                       >
                         Delete
                       </ContextMenuItem>

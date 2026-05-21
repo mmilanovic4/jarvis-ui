@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-export const font = Outfit({
+const font = Outfit({
   subsets: ["latin"],
 });
 
@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
             __html: `
       (function() {
         const stored = localStorage.getItem('theme');
-        const dark = stored ? stored === 'dark' : 'light';
+        const dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (dark) document.documentElement.classList.add('dark');
       })();
     `,

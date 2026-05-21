@@ -11,7 +11,7 @@ function subscribe(cb) {
 function getSnapshot() {
   const stored = localStorage.getItem("theme");
   if (stored) return stored === "dark";
-  return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 function getServerSnapshot() {

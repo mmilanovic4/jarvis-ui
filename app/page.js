@@ -78,6 +78,9 @@ export default function Home() {
 
     const content = input.trim();
     setInput("");
+
+    setMessages((prev) => [...prev, { role: "user", content }]);
+
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setSending(true);
 
@@ -93,7 +96,6 @@ export default function Home() {
     const data = await res.json();
     setMessages((prev) => [
       ...prev,
-      { role: "user", content },
       { role: "assistant", content: data.message },
     ]);
     setConversations((prev) =>
@@ -330,7 +332,6 @@ export default function Home() {
         <div className="mx-auto w-full max-w-2xl">
           <div className="bg-muted/40 focus-within:border-primary flex items-end gap-2 rounded-2xl border px-4 py-3 transition-colors">
             <Textarea
-              autoFocus
               id="user-input"
               ref={textareaRef}
               value={input}
