@@ -1,6 +1,8 @@
 "use client";
 import { ArrowUp, HomeIcon, Mic, Search, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import { useAppContext } from "@/app/context/app-context";
 import { Button } from "@/components/ui/button";
@@ -288,12 +290,30 @@ export default function Home() {
                         : "bg-muted text-foreground rounded-tl-sm",
                     )}
                   >
-                    {m.content.split("\n").map((line, j, arr) => (
-                      <span key={j}>
-                        {highlightText(line, query)}
-                        {j < arr.length - 1 && <br />}
-                      </span>
-                    ))}
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeHighlight]}
+                      components={{
+                        code({ inline, className, children, ...props }) {
+                          return inline ? (
+                            <code
+                              className="bg-background rounded px-1 py-0.5 font-mono text-xs"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          );
+                        },
+                        p({ children }) {
+                          return <p className="mb-2 last:mb-0">{children}</p>;
+                        },
+                      }}
+                    >
+                      {m.content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ))}

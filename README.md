@@ -3,6 +3,8 @@
 A local AI assistant interface powered by [Ollama](https://ollama.com).
 Runs entirely on your machine — no cloud, no API keys, no data leaving your device.
 
+![Jarvis UI](screenshot.png)
+
 ## Requirements
 
 - [Node.js](https://nodejs.org)
