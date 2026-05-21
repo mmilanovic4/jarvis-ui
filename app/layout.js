@@ -27,11 +27,12 @@ export default function RootLayout({ children }) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-        try {
-          var theme = localStorage.getItem('theme');
-          if (theme === 'dark') document.documentElement.classList.add('dark');
-        } catch(e) {}
-      `,
+      (function() {
+        const stored = localStorage.getItem('theme');
+        const dark = stored ? stored === 'dark' : 'light';
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    `,
           }}
         />
       </head>
