@@ -1,5 +1,13 @@
 "use client";
-import { ArrowUp, HomeIcon, Mic, Search, X } from "lucide-react";
+import {
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  HomeIcon,
+  Mic,
+  Search,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -26,12 +34,24 @@ export default function Home() {
   const [listening, setListening] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [matchIndex, setMatchIndex] = useState(0);
   const bottomRef = useRef(null);
+  const scrollRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const matchRefs = useRef({});
 
   const modelAvailable = models.includes(selectedConversation?.model);
   const inputDisabled = sending || !selectedConversation || !modelAvailable;
+
+  const matchingIndices = query.trim()
+    ? messages
+        .map((m, i) => ({ m, i }))
+        .filter(({ m }) =>
+          m.content.toLowerCase().includes(query.toLowerCase()),
+        )
+        .map(({ i }) => i)
+    : [];
 
   const onKeyDown = useCallback(
     (e) => {
@@ -72,8 +92,29 @@ export default function Home() {
   }, [messages, sending]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [selectedConversation]);
+
+  useEffect(() => {
+    const resetMatch = () => setMatchIndex(0);
+    resetMatch();
+    if (!query.trim() || matchingIndices.length === 0) return;
+    matchRefs.current[matchingIndices[0]]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [query]);
+
+  function goToMatch(index) {
+    const clamped = (index + matchingIndices.length) % matchingIndices.length;
+    setMatchIndex(clamped);
+    matchRefs.current[matchingIndices[clamped]]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
 
   async function sendMessage() {
     if (!input.trim() || sending || !selectedConversation) return;
@@ -148,28 +189,6 @@ export default function Home() {
     setListening(true);
   }
 
-  function highlightText(content, query) {
-    if (!searchOpen || !query.trim()) return <>{content}</>;
-
-    const parts = content.split(new RegExp(`(${query})`, "gi"));
-    return (
-      <>
-        {parts.map((part, i) =>
-          part.toLowerCase() === query.toLowerCase() ? (
-            <mark
-              key={i}
-              className="rounded-sm bg-yellow-300 px-0.5 dark:bg-yellow-600"
-            >
-              {part}
-            </mark>
-          ) : (
-            part
-          ),
-        )}
-      </>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2">
@@ -221,14 +240,31 @@ export default function Home() {
             className="placeholder:text-muted-foreground flex-1 bg-transparent text-sm outline-none"
           />
           {query && (
-            <span className="text-muted-foreground text-xs">
-              {
-                messages.filter((m) =>
-                  m.content.toLowerCase().includes(query.toLowerCase()),
-                ).length
-              }{" "}
-              results
-            </span>
+            <>
+              <span className="text-muted-foreground text-xs">
+                {matchingIndices.length > 0
+                  ? `${matchIndex + 1} / ${matchingIndices.length}`
+                  : "0 results"}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                disabled={matchingIndices.length === 0}
+                onClick={() => goToMatch(matchIndex - 1)}
+              >
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                disabled={matchingIndices.length === 0}
+                onClick={() => goToMatch(matchIndex + 1)}
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </>
           )}
           <Button
             variant="ghost"
@@ -244,7 +280,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl px-4 py-12">
           {!selectedConversation ? (
             <div className="flex flex-col items-center justify-center gap-3 pt-[25vh] text-center">
@@ -267,9 +303,14 @@ export default function Home() {
               {messages.map((m, i) => (
                 <div
                   key={i}
+                  ref={(el) => (matchRefs.current[i] = el)}
                   className={cn(
-                    "flex items-start gap-3",
+                    "flex items-start gap-3 rounded-xl transition-colors duration-300",
                     m.role === "user" && "flex-row-reverse",
+                    matchingIndices.includes(i) &&
+                      (i === matchingIndices[matchIndex]
+                        ? "bg-primary/10 outline-primary/50 outline outline-2"
+                        : "bg-primary/5 outline-primary/20 outline outline-1"),
                   )}
                 >
                   <div
