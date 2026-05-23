@@ -309,8 +309,8 @@ export default function Home() {
                     m.role === "user" && "flex-row-reverse",
                     matchingIndices.includes(i) &&
                       (i === matchingIndices[matchIndex]
-                        ? "bg-primary/10 outline-primary/50 outline outline-2"
-                        : "bg-primary/5 outline-primary/20 outline outline-1"),
+                        ? "bg-primary/10 outline-primary/50 outline-2"
+                        : "bg-primary/5 outline-primary/20 outline"),
                   )}
                 >
                   <div
