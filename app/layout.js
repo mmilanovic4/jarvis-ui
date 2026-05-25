@@ -1,4 +1,4 @@
-import { Noto_Sans, JetBrains_Mono } from "next/font/google";
+import { Outfit, JetBrains_Mono } from "next/font/google";
 import { SidebarClient } from "@/app/components";
 import { AppProvider } from "@/app/context/app-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-const fontSans = Noto_Sans({
+const fontSans = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",
 });
