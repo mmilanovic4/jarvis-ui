@@ -1,4 +1,4 @@
-import { Outfit } from "next/font/google";
+import { Noto_Sans, JetBrains_Mono } from "next/font/google";
 import { SidebarClient } from "@/app/components";
 import { AppProvider } from "@/app/context/app-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -7,8 +7,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-const font = Outfit({
+const fontSans = Noto_Sans({
   subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export const metadata = {
@@ -21,7 +27,7 @@ export default function RootLayout({ children }) {
     <html
       suppressHydrationWarning
       lang="en"
-      className={`${font.className} subpixel-antialiased`}
+      className={`${fontSans.variable} ${fontMono.variable} subpixel-antialiased`}
     >
       <head>
         <script

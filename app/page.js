@@ -8,7 +8,13 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
@@ -87,15 +93,13 @@ export default function Home() {
     loadMessages();
   }, [selectedConversation]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, sending]);
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [selectedConversation]);
+    if (!el || messages.length === 0) return;
+
+    el.scrollTop = el.scrollHeight;
+  }, [selectedConversation, messages.length]);
 
   useEffect(() => {
     const resetMatch = () => setMatchIndex(0);
