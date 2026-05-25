@@ -124,32 +124,34 @@ export default function Home() {
     if (!input.trim() || sending || !selectedConversation) return;
 
     const content = input.trim();
+    const convId = selectedConversation.id;
     setInput("");
-
     setMessages((prev) => [...prev, { role: "user", content }]);
-
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setSending(true);
 
     const res = await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        conversationId: selectedConversation.id,
-        content,
-      }),
+      body: JSON.stringify({ conversationId: convId, content }),
     });
 
     const data = await res.json();
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: data.message },
-    ]);
+
+    setSelectedConversation((current) => {
+      if (current?.id === convId) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.message },
+        ]);
+      }
+      return current;
+    });
+
     setConversations((prev) =>
-      prev.map((c) =>
-        c.id === selectedConversation.id ? { ...c, title: data.title } : c,
-      ),
+      prev.map((c) => (c.id === convId ? { ...c, title: data.title } : c)),
     );
+
     setSending(false);
   }
 
