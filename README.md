@@ -5,8 +5,6 @@ _Iskra (искра) means spark in Serbian._
 A local AI assistant powered by [Ollama](https://ollama.com).
 Runs entirely on your machine — no cloud, no API keys, no data leaving your device.
 
-![Iskra](screenshot.png)
-
 ## Requirements
 
 - [Node.js](https://nodejs.org)
