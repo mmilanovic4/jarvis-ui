@@ -30,6 +30,7 @@ const Toaster = ({ ...props }) => {
         "--normal-border": "var(--border)",
         "--border-radius": "var(--radius)",
       }}
+      position="top-right"
       toastOptions={{
         classNames: {
           toast: "cn-toast",
