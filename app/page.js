@@ -25,6 +25,47 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./components/theme-toggle";
 
+function highlightText(text, query, childIndex = 0) {
+  const q = query.toLowerCase();
+  const lower = text.toLowerCase();
+  const parts = [];
+  let last = 0;
+  let pos = lower.indexOf(q);
+  if (pos === -1) return text;
+  while (pos !== -1) {
+    if (pos > last) parts.push(text.slice(last, pos));
+    parts.push(
+      <mark
+        key={`h-${childIndex}-${pos}`}
+        className="rounded-sm bg-yellow-200 dark:bg-yellow-800"
+      >
+        {text.slice(pos, pos + query.length)}
+      </mark>,
+    );
+    last = pos + query.length;
+    pos = lower.indexOf(q, last);
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
+function applyHighlight(children, query) {
+  if (!query.trim()) return children;
+  const arr = Array.isArray(children) ? children : [children];
+  const result = [];
+  arr.forEach((child, ci) => {
+    if (typeof child === "string") {
+      const highlighted = highlightText(child, query, ci);
+      Array.isArray(highlighted)
+        ? result.push(...highlighted)
+        : result.push(highlighted);
+    } else {
+      result.push(child);
+    }
+  });
+  return result;
+}
+
 export default function Home() {
   const {
     status,
@@ -313,10 +354,6 @@ export default function Home() {
                   className={cn(
                     "flex items-start gap-3 rounded-xl transition-colors duration-300",
                     m.role === "user" && "flex-row-reverse",
-                    matchingIndices.includes(i) &&
-                      (i === matchingIndices[matchIndex]
-                        ? "bg-primary/10 outline-primary/50 outline-2"
-                        : "bg-primary/5 outline-primary/20 outline"),
                   )}
                 >
                   <div
@@ -355,7 +392,26 @@ export default function Home() {
                           );
                         },
                         p({ children }) {
-                          return <p className="mb-2 last:mb-0">{children}</p>;
+                          return (
+                            <p className="mb-2 last:mb-0">
+                              {applyHighlight(children, query)}
+                            </p>
+                          );
+                        },
+                        li({ children }) {
+                          return (
+                            <li>{applyHighlight(children, query)}</li>
+                          );
+                        },
+                        strong({ children }) {
+                          return (
+                            <strong>{applyHighlight(children, query)}</strong>
+                          );
+                        },
+                        em({ children }) {
+                          return (
+                            <em>{applyHighlight(children, query)}</em>
+                          );
                         },
                       }}
                     >
