@@ -1,5 +1,7 @@
 # Iskra
 
+_Iskra (искра) means spark in Serbian._
+
 A local AI assistant powered by [Ollama](https://ollama.com).
 Runs entirely on your machine — no cloud, no API keys, no data leaving your device.
 
@@ -23,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:6789](http://localhost:6789).
+Open [http://localhost:1234](http://localhost:1234).
 
 ## Features
 

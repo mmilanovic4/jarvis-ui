@@ -93,11 +93,11 @@ export default function Home() {
 
   const matchingIndices = query.trim()
     ? messages
-      .map((m, i) => ({ m, i }))
-      .filter(({ m }) =>
-        m.content.toLowerCase().includes(query.toLowerCase()),
-      )
-      .map(({ i }) => i)
+        .map((m, i) => ({ m, i }))
+        .filter(({ m }) =>
+          m.content.toLowerCase().includes(query.toLowerCase()),
+        )
+        .map(({ i }) => i)
     : [];
 
   const onKeyDown = useCallback(
@@ -179,14 +179,9 @@ export default function Home() {
 
     const data = await res.json();
 
-    setSelectedConversation((current) => {
-      if (current?.id === convId) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.message },
-        ]);
-      }
-      return current;
+    setMessages((prev) => {
+      if (selectedConversation?.id !== convId) return prev;
+      return [...prev, { role: "assistant", content: data.message }];
     });
 
     setConversations((prev) =>
@@ -399,9 +394,7 @@ export default function Home() {
                           );
                         },
                         li({ children }) {
-                          return (
-                            <li>{applyHighlight(children, query)}</li>
-                          );
+                          return <li>{applyHighlight(children, query)}</li>;
                         },
                         strong({ children }) {
                           return (
@@ -409,9 +402,7 @@ export default function Home() {
                           );
                         },
                         em({ children }) {
-                          return (
-                            <em>{applyHighlight(children, query)}</em>
-                          );
+                          return <em>{applyHighlight(children, query)}</em>;
                         },
                       }}
                     >

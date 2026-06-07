@@ -112,17 +112,19 @@ function ConversationDialog({
 
         <DialogFooter>
           <Button
+            className="sm:order-2"
+            onClick={onSubmit}
+            disabled={loading || !title.trim() || (isCreate && !model)}
+          >
+            {loading ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            className="sm:order-1"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
           >
             Cancel
-          </Button>
-          <Button
-            onClick={onSubmit}
-            disabled={loading || !title.trim() || (isCreate && !model)}
-          >
-            {loading ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
