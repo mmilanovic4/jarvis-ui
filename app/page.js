@@ -93,11 +93,11 @@ export default function Home() {
 
   const matchingIndices = query.trim()
     ? messages
-        .map((m, i) => ({ m, i }))
-        .filter(({ m }) =>
-          m.content.toLowerCase().includes(query.toLowerCase()),
-        )
-        .map(({ i }) => i)
+      .map((m, i) => ({ m, i }))
+      .filter(({ m }) =>
+        m.content.toLowerCase().includes(query.toLowerCase()),
+      )
+      .map(({ i }) => i)
     : [];
 
   const onKeyDown = useCallback(
@@ -467,7 +467,7 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder={
                 selectedConversation
-                  ? "Message Jarvis... (Shift + Enter for new line)"
+                  ? "Message Iskra... (Shift + Enter for new line)"
                   : "Select or create a conversation first"
               }
               disabled={inputDisabled}

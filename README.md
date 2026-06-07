@@ -1,9 +1,9 @@
-# Jarvis UI
+# Iskra
 
-A local AI assistant interface powered by [Ollama](https://ollama.com).
+A local AI assistant powered by [Ollama](https://ollama.com).
 Runs entirely on your machine — no cloud, no API keys, no data leaving your device.
 
-![Jarvis UI](screenshot.png)
+![Iskra](screenshot.png)
 
 ## Requirements
 
@@ -17,8 +17,8 @@ ollama pull llama3
 ## Getting Started
 
 ```bash
-git clone https://github.com/mmilanovic4/jarvis-ui
-cd jarvis-ui
+git clone https://github.com/mmilanovic4/iskra
+cd iskra
 npm install
 npm run dev
 ```
@@ -27,14 +27,16 @@ Open [http://localhost:6789](http://localhost:6789).
 
 ## Features
 
-- Chat with local Ollama models
+- Chat with any locally installed Ollama model
 - Persistent conversation history (SQLite)
 - Model switching per conversation
+- Voice input via Web Speech API
+- Markdown rendering with syntax highlighting
 - Fully offline after setup
 
 ## Stack
 
 - Next.js
-- Tailwind CSS
-- SQLite
+- Tailwind CSS + shadcn/ui
+- SQLite (better-sqlite3)
 - Ollama

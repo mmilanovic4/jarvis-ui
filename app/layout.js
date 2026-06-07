@@ -18,7 +18,7 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Jarvis",
+  title: "Iskra",
   description: "AI assistant interface",
 };
 

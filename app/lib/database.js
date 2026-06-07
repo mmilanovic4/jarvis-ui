@@ -2,7 +2,7 @@ import path from "path";
 import Database from "better-sqlite3";
 import { uuid } from "./uuid";
 
-const db = new Database(path.join(process.cwd(), "jarvis.db"));
+const db = new Database(path.join(process.cwd(), "iskra.db"));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS conversations (

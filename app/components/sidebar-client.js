@@ -288,7 +288,7 @@ export function SidebarClient() {
           <div className="flex h-8 items-center gap-2 px-4">
             <div className="bg-primary h-2 w-2 shrink-0 rounded-full" />
             <span className="text-sm font-semibold tracking-widest uppercase select-none">
-              Jarvis
+              Iskra
             </span>
           </div>
         </SidebarHeader>
